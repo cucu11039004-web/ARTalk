@@ -31,9 +31,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from math import gcd  # noqa: E402
+
 import numpy as np  # noqa: E402
+import soundfile as sf  # noqa: E402
 import torch  # noqa: E402
-import torchaudio  # noqa: E402
+from scipy.signal import resample_poly  # noqa: E402
 
 from artalk.models import BitwiseARModel  # noqa: E402
 from artalk.streaming import ARTalkStreamer  # noqa: E402
@@ -57,8 +60,13 @@ def gpu_snapshot() -> str:
 
 
 def load_audio(path: Path) -> torch.Tensor:
-    wav, sr = torchaudio.load(str(path))
-    return torchaudio.functional.resample(wav, sr, 16000).mean(dim=0)
+    # 不用 torchaudio.load：torchaudio 2.9 起它依赖 torchcodec；soundfile 能读 wav/flac/mp3
+    wav, sr = sf.read(str(path), dtype="float32", always_2d=True)
+    wav = wav.mean(axis=1)
+    if sr != 16000:
+        g = gcd(sr, 16000)
+        wav = resample_poly(wav, 16000 // g, sr // g).astype(np.float32)
+    return torch.from_numpy(wav)
 
 
 def main() -> None:
