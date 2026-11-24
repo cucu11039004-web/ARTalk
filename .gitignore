@@ -167,3 +167,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 !artalk/assets_manifest.json
+
+# spark 分支：依赖文件与基准音频要进 git，基准结果不进
+!setup/requirements-*.txt
+!bench/audio/
+!bench/audio/*
+bench/results/

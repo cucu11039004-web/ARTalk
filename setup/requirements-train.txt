@@ -1,0 +1,16 @@
+# ARTalk 训练额外依赖：在推理依赖之上追加。用法：bash setup/install_spark.sh --train
+# 以 train_code 里实际 import 的包为准。
+#
+# 注意：train_code 的 vae_trainer / ar_trainer / inferencer 构造时会实例化 RenderMesh（训练中可视化用），
+# 它依赖 pytorch3d；aarch64 上没有预编译包，需要源码编译（要 nvcc，本机已有 /usr/local/cuda-13）。
+# 这里先不装。真正开始训练前，二选一：
+#   1) 在 spark 上从源码编译 pytorch3d：pip install "git+https://github.com/facebookresearch/pytorch3d.git"
+#   2) 把 trainer 里的 RenderMesh 改成可选（推理侧 artalk/flame_model 已这样处理）
+-r requirements-infer.txt
+
+accelerate
+pyyaml
+omegaconf==2.3.0
+lmdb==1.5.1
+wandb
+ipdb

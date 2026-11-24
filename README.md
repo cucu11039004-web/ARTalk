@@ -32,8 +32,24 @@
 <!-- ## TO DO
 We are now preparing the <b>pre-trained model and quick start materials</b> and will release it within a week. -->
 
-## Installation
-### Clone the project
+## Spark（aarch64 + GB10 + CUDA 13）
+
+本节是 fork 针对 NVIDIA GB10（Blackwell，aarch64）加的环境与时延测试流程，只覆盖“生成 FLAME 系数”，不渲染。官方的 `environment.yml`（x86 + CUDA 12.1 + pytorch3d + faiss-gpu）保留作对照。
+
+```shell
+git clone git@github.com:cucu11039004-web/ARTalk.git && cd ARTalk && git checkout spark
+bash setup/install_spark.sh              # conda 环境 artalk（Python 3.12 + torch 2.9.1+cu130），只含推理依赖
+# 训练时再装：bash setup/install_spark.sh --train
+conda activate artalk
+bash setup/fetch_weights.sh              # 下载权重并校验 SHA-256，缓存 wav2vec2 配置
+python bench/infer_bench.py              # 时延基准，说明见 bench/README.md
+```
+
+- 不装 `pytorch3d`、`gradio`、`diff-gaussian-rasterization`、`faiss`：推理只要系数。`artalk/flame_model/__init__.py` 把 `RenderMesh` 改成了可选导入，缺 `pytorch3d` 时不再报错。
+- 不下载 `FLAME_with_eye.pt`（FLAME 许可需本人确认），所以 `ARTalkRuntime`（会建 FLAME 网格）和渲染相关的路径不能用；直接用 `BitwiseARModel.inference` 或 `ARTalkStreamer` 拿系数。
+- 局域网内传权重：`rsync -avP <源机>:<路径>/assets/ ./assets/`，再运行 `fetch_weights.sh` 校验。
+
+
 ```
 git clone --recurse-submodules git@github.com:xg-chu/ARTalk.git
 cd ARTalk
